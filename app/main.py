@@ -5,9 +5,9 @@ import uuid
 import cv2
 import numpy as np
 import os
-from .yolo_inference import detect_chromosomes, CLASS_NAMES
-from .plotting import plot_instance_segmentation, save_matplotlib_fig
-from .create_karyogram import  draw_karyogram
+from yolo_inference import detect_chromosomes, CLASS_NAMES
+from plotting import plot_instance_segmentation, save_matplotlib_fig
+from create_karyogram import  draw_karyogram
 
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 
