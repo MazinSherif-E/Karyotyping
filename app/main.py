@@ -18,6 +18,7 @@ os.makedirs(STATIC_DIR, exist_ok=True)
 
 @app.post("/karyogram/")
 async def generate_karyogram(image_file: UploadFile = File(...)):
+    print("Received:", image_file.filename)
     # Save uploaded image temporarily
     temp_path = f"temp_{uuid.uuid4().hex}.jpg"
     with open(temp_path, "wb") as buffer:
@@ -40,3 +41,7 @@ async def generate_karyogram(image_file: UploadFile = File(...)):
         media_type="image/png",
         filename=karyo_filename
     )
+
+@app.get("/")
+def read_root():
+    return {"status": "ok"}
