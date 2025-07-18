@@ -9,9 +9,9 @@ import logging
 import gc
 import traceback
 from pathlib import Path
-from .yolo_inference import detect_chromosomes, CLASS_NAMES
-from .plotting import plot_instance_segmentation, save_matplotlib_fig
-from .create_karyogram import draw_karyogram
+from yolo_inference import detect_chromosomes, CLASS_NAMES
+from plotting import plot_instance_segmentation, save_matplotlib_fig
+from create_karyogram import draw_karyogram
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
