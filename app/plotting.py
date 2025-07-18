@@ -1,7 +1,12 @@
 import cv2
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')  # Use non-GUI backend for headless environments
 import matplotlib.pyplot as plt
 from pathlib import Path
+import logging
+
+logger = logging.getLogger(__name__)
 
 def plot_instance_segmentation(res, class_names):
     img_orig = res[0].orig_img
@@ -27,7 +32,14 @@ def plot_instance_segmentation(res, class_names):
 
 
 def save_matplotlib_fig(fig, save_path):
-    save_path = Path(save_path)
-    save_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(str(save_path), dpi=300, bbox_inches='tight', pad_inches=0.1)
-    plt.close(fig)
+    try:
+        save_path = Path(save_path)
+        save_path.parent.mkdir(parents=True, exist_ok=True)
+        logger.info(f"Saving figure to: {save_path}")
+        fig.savefig(str(save_path), dpi=300, bbox_inches='tight', pad_inches=0.1)
+        logger.info("Figure saved successfully")
+        plt.close(fig)
+    except Exception as e:
+        logger.error(f"Error saving figure: {str(e)}")
+        plt.close(fig)
+        raise

@@ -1,9 +1,22 @@
 import torch
 from ultralytics import YOLO
+from pathlib import Path
+import logging
 
-# Load model once globally
-model_path = r'../models/best.pt'
-model = YOLO(model_path)
+logger = logging.getLogger(__name__)
+
+# Load model once globally with absolute path
+PROJECT_ROOT = Path(__file__).parent.parent
+model_path = PROJECT_ROOT / "models" / "best.pt"
+
+logger.info(f"Loading YOLO model from: {model_path}")
+
+if not model_path.exists():
+    logger.error(f"Model file not found at: {model_path}")
+    raise FileNotFoundError(f"Model file not found at: {model_path}")
+
+model = YOLO(str(model_path))
+logger.info("YOLO model loaded successfully")
 
 NUM_CLASSES = 24
 CLASS_NAMES = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10',
@@ -31,8 +44,6 @@ def apply_nms(res, iou_thresh=0.7, conf_thresh=0.2):
                 else:
                     to_remove.append(i)
 
-
-
     to_keep = [i for i in range(len(masks)) if i not in to_remove]
     masks = masks[to_keep]
     boxes = boxes[to_keep]
@@ -43,6 +54,11 @@ def apply_nms(res, iou_thresh=0.7, conf_thresh=0.2):
 
 
 def detect_chromosomes(image_path):
+    logger.info(f"Running YOLO prediction on: {image_path}")
     res = model.predict(image_path, conf=0.2, multi_scale=True, verbose=False)
+    logger.info(f"YOLO prediction completed. Found {len(res[0].boxes)} initial detections")
+    
     res = apply_nms(res)
+    logger.info(f"After NMS: {len(res[0].boxes)} final detections")
+    
     return res

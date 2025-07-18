@@ -1,8 +1,21 @@
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')  # Use non-GUI backend for headless environments
 import matplotlib.pyplot as plt
 import cv2
+from pathlib import Path
+import logging
+
+logger = logging.getLogger(__name__)
+
+# Use absolute path for chromosome pool
+PROJECT_ROOT = Path(__file__).parent.parent
+CHROMS_POOL_DIR = PROJECT_ROOT / "chroms_pool"
+
+logger.info(f"Chromosome pool directory: {CHROMS_POOL_DIR}")
 
 def draw_karyogram(res, classes):
+    logger.info("Starting karyogram creation")
     kayrogram = np.ones((300, 2000, 3), dtype=np.uint8) * 255
     counts = {i: 0 for i in classes}
     space_in = 10
@@ -16,6 +29,8 @@ def draw_karyogram(res, classes):
 
     pair_info = {}
 
+    logger.info(f"Processing {len(classes_inds)} chromosomes")
+
     for cls in classes_inds:
         cls_ind = cls
         if cls_ind == 12 and starty == 150:
@@ -24,9 +39,21 @@ def draw_karyogram(res, classes):
         counts[classes[cls_ind]] += 1
 
         if classes[cls_ind] != 'y':
-            chrom = cv2.imread(f'./chroms_pool/{classes[cls_ind]}.{counts[classes[cls_ind]] % 2}.png')
+            chrom_path = CHROMS_POOL_DIR / f'{classes[cls_ind]}.{counts[classes[cls_ind]] % 2}.png'
         else:
-            chrom = cv2.imread(f'./chroms_pool/{classes[cls_ind]}.png')
+            chrom_path = CHROMS_POOL_DIR / f'{classes[cls_ind]}.png'
+        
+        logger.debug(f"Loading chromosome image: {chrom_path}")
+        
+        if not chrom_path.exists():
+            logger.error(f"Chromosome image not found: {chrom_path}")
+            continue
+            
+        chrom = cv2.imread(str(chrom_path))
+        
+        if chrom is None:
+            logger.error(f"Failed to load chromosome image: {chrom_path}")
+            continue
 
         ys, xs = np.where(chrom[:, :, 0] < 230)
         min_y, max_y, min_x, max_x_crop = np.min(ys), np.max(ys), np.min(xs), np.max(xs)
@@ -107,4 +134,6 @@ def draw_karyogram(res, classes):
     ax.axis('off')
     ax.set_title("Karyogram")
     fig.tight_layout()
+    
+    logger.info("Karyogram creation completed")
     return fig
